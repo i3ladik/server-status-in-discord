@@ -42,21 +42,25 @@ class StatusCoordinator {
                 const { imageUrl, color } = this.config;
 
                 const channel = await client.channels.fetch(channelId).catch(() => {
-                    throw new Error('I didnt find the channel. Perhaps I was not invited to the server or permissions in channel not given');
+                    console.log('Stats bot: I didnt find the channel. Maybe I was not invited to the server or permissions in channel not given. Restart after fix');
+                    return;
                 });
-                let message;
 
-                const statEmbed = createStatMsg(servers, imageUrl, color);
-                if (hasId(statBot.messageId)) {
-                    message = await channel.messages.fetch(statBot.messageId).catch(() => { return; });
-
-                    if (message) message.edit({ embeds: [statEmbed] });
+                if(channel){
+                    let message;
+    
+                    const statEmbed = createStatMsg(servers, imageUrl, color);
+                    if (hasId(statBot.messageId)) {
+                        message = await channel.messages.fetch(statBot.messageId).catch(() => { return; });
+    
+                        if (message) message.edit({ embeds: [statEmbed] });
+                        else message = await channel.send({ embeds: [statEmbed] });
+                    }
                     else message = await channel.send({ embeds: [statEmbed] });
+    
+                    this.message = message;
+                    statBot.messageId = message.id;
                 }
-                else message = await channel.send({ embeds: [statEmbed] });
-
-                this.message = message;
-                statBot.messageId = message.id;
             }
 
             setInterval(() => this.update(), update_ms);

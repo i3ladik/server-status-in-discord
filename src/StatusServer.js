@@ -46,8 +46,12 @@ class StatusServer {
             const { imageUrl, color } = this.config;
 
             const channel = await client.channels.fetch(channelId).catch(() => {
-                throw new Error('I didnt find the channel. Maybe I was not invited to the server or permissions in channel not given');
+                console.log(`${name}: I didnt find the channel. Maybe I was not invited to the server or permissions in channel not given. Restart after fix`);
+                return;
             });
+
+            if (!channel) return;
+
             let message;
 
             const servEmbed = new EmbedBuilder().setImage(imageUrl).setColor(color).setDescription('**Temp message. Wait update...**');
