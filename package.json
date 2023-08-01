@@ -1,0 +1,19 @@
+{
+  "name": "server-status-in-discord",
+  "version": "1.0.0",
+  "description": "Simple server monitoring in discord",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "author": "i3ladik",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "@fabricio-191/valve-server-query": "^4.1.9",
+    "discord.js": "^14.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

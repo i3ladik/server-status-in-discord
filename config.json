@@ -1,0 +1,44 @@
+{
+    "update_ms": 60000,
+    "timeout_ms": 60000,
+    "maxOnline": 0,
+    "channelId": "channelId",
+    "startMsg": "starting...",
+    "statusMsg": "{online}/{max} on {map}",
+    "statusBotMsg": "online: {online} Max: {max}",
+    "unavailableMsg": "unavailable...",
+    "playersLabel": "Players 👥",
+    "mapLabel": "Map 🗺️",
+    "nicknameLabel": "Nickname 📛",
+    "scoreLabel": "Score 🏆",
+    "footerText": "Connect 👇",
+    "btnLabel": "Connect",
+    "color": "#2b2d31",
+    "imageUrl": "https://imgur.com/Yk9EZkj",
+    "statBot": {
+        "token": "token",
+        "messageId": "messageId"
+    },
+    "servers": [
+        {
+            "name": "name",
+            "host": "host",
+            "token": "token",
+            "messageId": "messageId",
+            "connectUrl": "leave this message if not"
+        },
+        {
+            "name": "name",
+            "host": "host",
+            "token": "token",
+            "messageId": "messageId",
+            "connectUrl": "leave this message if not"
+        }
+    ],
+    "maps": {
+        "default": {
+            "img": "https://i.imgur.com/QtxEQQE.png",
+            "name": "MAP"
+        }
+    }
+}
