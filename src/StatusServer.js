@@ -27,7 +27,7 @@ class StatusServer {
         const { token, host, name } = this.serverData;
         const { channelId, timeout_ms, update_ms, startMsg } = this.config;
 
-        if (token.length > 10) return;
+        if (token.length < 10) return;
 
         const ip = host.split(':')[0];
         const port = Number(host.split(':')[1]);
