@@ -1,6 +1,5 @@
 # server-status-in-discord
-Simple server monitoring in discord
-<br><br>
+Simple server monitoring in discord<br><br>
 
 **Some** of the games where it works with are:
 - Counter-Strike
@@ -9,13 +8,16 @@ Simple server monitoring in discord
 - Half-Life
 - Team Fortress 2
 - Day of Defeat
-- The ship
-<br>
+- The ship<br>
+
 **More info - [here](https://www.npmjs.com/package/@fabricio-191/valve-server-query)**
 
 # How to use
+
 ## Fill in the configuration file
+
 ### Example
+
 ```
 {
     "update_ms": 60000,
@@ -56,23 +58,33 @@ Simple server monitoring in discord
     }
 }
 ```
+
 ## Install packages and run
+
 ### Node
-`npm install`
-<br>
+
+`npm install`<br>
+
 `npm start`
+
 ### Docker compose
+
 `docker-compose up --build`
+
 ## Invite bots
-The application will send links to invite bots to the server in the log
-<br>
+
+The application will send links to invite bots to the server in the log<br>
+
 ```
 Stats bot invite link: https://discord.com/api/oauth2/authorize?client_id=...
 Stats No url example bot invite link: https://discord.com/api/oauth2/authorize?client_id=...
 Stats Url example bot invite link: https://discord.com/api/oauth2/authorize?client_id=...
 ```
+
 Add all bots and restart
+
 # Result
-![Status ](https://i.imgur.com/08qqV39.png)
-<br><br>
+
+![Status ](https://i.imgur.com/08qqV39.png)<br>
+
 ![Monitoring messages](https://i.imgur.com/hsgDPkY.png)
