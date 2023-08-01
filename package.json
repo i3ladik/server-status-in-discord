@@ -15,5 +15,13 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/i3ladik/server-status-in-discord.git"
+  },
+  "bugs": {
+    "url": "https://github.com/i3ladik/server-status-in-discord/issues"
+  },
+  "homepage": "https://github.com/i3ladik/server-status-in-discord#readme"
 }
