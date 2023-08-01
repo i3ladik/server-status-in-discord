@@ -1,6 +1,8 @@
 const { Client, ActivityType, OAuth2Scopes, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const { Server } = require('@fabricio-191/valve-server-query');
 
+const hasId = (input) => /^\d+$/.test(input);
+
 /**
 * Status server class
 */
@@ -25,7 +27,7 @@ class StatusServer {
         const { token, host, name } = this.serverData;
         const { channelId, timeout_ms, update_ms, startMsg } = this.config;
 
-        if (token === 'token') return;
+        if (token.length > 10) return;
 
         const ip = host.split(':')[0];
         const port = Number(host.split(':')[1]);
@@ -40,7 +42,7 @@ class StatusServer {
         const link = client.generateInvite({ scopes: [OAuth2Scopes.Bot] });
         console.log(`Stats ${name} bot invite link: ${link}`);
 
-        if (channelId !== 'channelId') {
+        if (hasId(channelId)) {
             const { imageUrl, color } = this.config;
 
             const channel = await client.channels.fetch(channelId).catch(() => {
@@ -49,7 +51,7 @@ class StatusServer {
             let message;
 
             const servEmbed = new EmbedBuilder().setImage(imageUrl).setColor(color).setDescription('**Temp message. Wait update...**');
-            if (this.serverData.messageId !== 'messageId') {
+            if (hasId(this.serverData.messageId)) {
                 message = await channel.messages.fetch(this.serverData.messageId).catch(() => { return; });
                 if (!message) message = await channel.send({ embeds: [servEmbed] });
             }

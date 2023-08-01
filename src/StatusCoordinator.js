@@ -2,6 +2,8 @@ const { Client, ActivityType, OAuth2Scopes, EmbedBuilder } = require('discord.js
 const StatusServer = require('./StatusServer.js');
 const fs = require('fs');
 
+const hasId = (input) => /^\d+$/.test(input);
+
 /**
 * Status coordinator class
 */
@@ -27,7 +29,7 @@ class StatusCoordinator {
     async init() {
         const { statBot, startMsg, channelId, servers, update_ms } = this.config;
 
-        if (statBot.token !== 'token') {
+        if (statBot.token.length > 10) {
             const client = new Client({ intents: [] });
             await client.login(statBot.token);
             client.user.setPresence({ activities: [{ type: ActivityType.Watching, name: startMsg }], status: 'idle' });
@@ -36,7 +38,7 @@ class StatusCoordinator {
             const link = client.generateInvite({ scopes: [OAuth2Scopes.Bot] });
             console.log(`Stats bot invite link: ${link}`);
 
-            if (channelId !== 'channelId') {
+            if (hasId(channelId)) {
                 const { imageUrl, color } = this.config;
 
                 const channel = await client.channels.fetch(channelId).catch(() => {
@@ -45,7 +47,7 @@ class StatusCoordinator {
                 let message;
 
                 const statEmbed = createStatMsg(servers, imageUrl, color);
-                if (statBot.messageId !== 'messageId') {
+                if (hasId(statBot.messageId)) {
                     message = await channel.messages.fetch(statBot.messageId).catch(() => { return; });
 
                     if (message) message.edit({ embeds: [statEmbed] });
