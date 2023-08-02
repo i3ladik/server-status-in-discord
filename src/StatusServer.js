@@ -65,6 +65,7 @@ class StatusServer {
             this.serverData.messageId = message.id;
         }
 
+        console.log(`${name} ready`);
         this.update();
         setInterval(() => this.update(), update_ms);
 
@@ -91,8 +92,7 @@ class StatusServer {
             if (Object.keys(this.message).length === 0) return;
 
             const players = await this.server.getPlayers();
-            const { connectUrl } = this.serverData;
-            const msgObject = createServMsg(info, players, map, this.bot.user.avatarURL(), this.config, connectUrl);
+            const msgObject = createServMsg(info, players, map, this.bot.user.avatarURL(), this.config, this.serverData.buttons);
             this.message.edit(msgObject);
 
         }
@@ -112,8 +112,23 @@ function getMap(map, maps) {
     return maps.default;
 }
 
-function createServMsg(info, players, map, avatar, config, connectUrl) {
-    const { imageUrl, color, playersLabel, mapLabel, nicknameLabel, scoreLabel, btnLabel, footerText } = config;
+function createServMsg(info, players, map, avatar, config, buttons) {
+    const msgObj = { embeds: [], components: [] };
+
+    const servEmbed = createEmbed(info, players, map, avatar, config);
+    msgObj.embeds.push(servEmbed);
+
+    const aRow = new ActionRowBuilder();
+    const buttonComps = createButtons(buttons);
+    if (buttonComps.length > 0) {
+        msgObj.components.push(aRow.addComponents(buttonComps));
+    }
+
+    return msgObj;
+}
+
+function createEmbed(info, players, map, avatar, config) {
+    const { imageUrl, color, playersLabel, mapLabel, nicknameLabel, scoreLabel, footerText } = config;
 
     const servEmbed = new EmbedBuilder().setImage(imageUrl).setColor(color);
 
@@ -133,11 +148,20 @@ function createServMsg(info, players, map, avatar, config, connectUrl) {
     ]);
     servEmbed.setFooter({ text: footerText, iconURL: avatar }).setThumbnail(map.img).setTimestamp();
 
-    const connectBtn = new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel(btnLabel);
-    if (connectUrl.startsWith('http')) connectBtn.setURL(connectUrl);
-    else connectBtn.setURL('https://example.com').setDisabled(true);
+    return servEmbed;
+}
 
-    return { embeds: [servEmbed], components: [new ActionRowBuilder().addComponents(connectBtn)] };
+function createButtons(buttons) {
+    const buttonsArr = [];
+
+    for (const button of buttons) {
+        if (!button.url.startsWith('http')) continue;
+        const btn = new ButtonBuilder().setStyle(ButtonStyle.Link).setLabel(button.label).setURL(button.url);
+        if(button.emoji) btn.setEmoji(button.emoji);
+        buttonsArr.push(btn);
+    }
+
+    return buttonsArr;
 }
 
 module.exports = StatusServer;

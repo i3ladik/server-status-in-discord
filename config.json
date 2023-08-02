@@ -12,7 +12,6 @@
     "nicknameLabel": "Nickname 📛",
     "scoreLabel": "Score 🏆",
     "footerText": "Connect 👇",
-    "btnLabel": "Connect",
     "color": "#2b2d31",
     "imageUrl": "https://imgur.com/Yk9EZkj",
     "statBot": {
@@ -27,14 +26,36 @@
             "host": "host",
             "token": "token",
             "messageId": "messageId",
-            "connectUrl": "leave this message if not"
+            "buttons": [
+                {
+                    "emoji": "👇",
+                    "label": "Connect",
+                    "url": "leave this if not"
+                },
+                {
+                    "emoji": "",
+                    "label": "Site",
+                    "url": "leave this if not"
+                }
+            ]
         },
         {
             "name": "name",
             "host": "host",
             "token": "token",
             "messageId": "messageId",
-            "connectUrl": "leave this message if not"
+            "buttons": [
+                {
+                    "emoji": "👇",
+                    "label": "Connect",
+                    "url": "leave this if not"
+                },
+                {
+                    "emoji": "",
+                    "label": "Site",
+                    "url": "leave this if not"
+                }
+            ]
         }
     ],
     "maps": {

@@ -31,7 +31,10 @@ function initConfig(config) {
         host: 'host',
         token: 'token',
         messageId: 'messageId',
-        connectUrl: 'leave this message if not'
+        buttons: [
+            { emoji: '👇', label: 'Connect', url: 'leave this if not'},
+            { emoji: '', label: 'Site', url: 'leave this if not'}
+        ]
     };
 
     config.update_ms = Number(config.update_ms) || 60000;
@@ -48,7 +51,6 @@ function initConfig(config) {
     config.nicknameLabel = config.nicknameLabel || 'Nickname 📛';
     config.scoreLabel = config.scoreLabel || 'Score 🏆';
     config.footerText = config.footerText || 'Connect 👇';
-    config.btnLabel = config.btnLabel || 'Connect';
     config.color = config.color || '#2b2d31';
     config.imageUrl = config.imageUrl || 'https://imgur.com/Yk9EZkj';
     config.statBot = config.statBot || statBotType;
