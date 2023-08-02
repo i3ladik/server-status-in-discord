@@ -23,7 +23,7 @@ Simple server monitoring in discord<br><br>
     "update_ms": 60000,
     "timeout_ms": 30000,
     "maxOnline": 0,
-    "channelId": "981326671221248020", // optional, not necessarily
+    "channelId": "981326671221248020", // optional
     "startMsg": "starting...",
     "statusMsg": "{online}/{max} on {map}",
     "statusBotMsg": "online: {online} Max: {max}",
@@ -33,18 +33,38 @@ Simple server monitoring in discord<br><br>
     "nicknameLabel": "Nickname 📛",
     "scoreLabel": "Score 🏆",
     "footerText": "Connect 👇",
-    "btnLabel": "Connect",
     "color": "#2b2d31",
     "imageUrl": "https://imgur.com/Yk9EZkj",
-    "statBot": { "token": "MIZrNTY2NTVzNTE3Nz...", "messageId": "1135961500910096425" }, // statBot optional, not necessarily
+    "statBot": {
+        "token": "MIZrNTY2NTVzNTE3Nz...",
+        "messageId": "messageId", // optional
+        "serversText": "- **{name} - {host}**",
+        "banner": "https://i.imgur.com/xN4r7PN.png"  // optional
+    },
     "servers": [
         { "name": "No url example", "host": "91.200.42.11:27022", "token": "MIZrNTY2NTVzNTE3Nz...",
-            "messageId": "1135961509634248716", // optional, not necessarily
-            "connectUrl": "leave this message if not" // optional, not necessarily
+            "messageId": "1135961509634248716", // optional
+            "buttons": [] // optional, max 5
         },
         { "name": "No url example", "host": "91.200.42.11:27020", "token": "MIZrNTY2NTVzNTE3Nz...",
-            "messageId": "messageId", // optional, not necessarily
-            "connectUrl": "https://oupro.gg/servers/retake2" // optional, not necessarily
+            "messageId": "messageId", // optional
+            "buttons": [  // optional, max 5
+                {
+                    "emoji": "👇",
+                    "label": "Connect",
+                    "url": "https://oupro.gg/servers/public1"
+                },
+                {
+                    "emoji": "<:oupro:1136296844763349032>",
+                    "label": "Site",
+                    "url": "https://oupro.gg/"
+                },
+                {
+                    "emoji": "",
+                    "label": "Rules",
+                    "url": "https://oupro.gg/rules"
+                }
+            ]
         },
         ...
     ],
@@ -87,4 +107,4 @@ Add all bots and restart
 
 ![Status ](https://i.imgur.com/08qqV39.png)<br>
 
-![Monitoring messages](https://i.imgur.com/hsgDPkY.png)
+![Monitoring messages](https://i.imgur.com/s5xeYLQ.png)
