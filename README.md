@@ -35,7 +35,7 @@ Simple server monitoring in discord<br><br>
     "footerText": "Connect 👇",
     "color": "#2b2d31",
     "imageUrl": "https://imgur.com/Yk9EZkj",
-    "statBot": {
+    "statBot": { //optional
         "token": "MIZrNTY2NTVzNTE3Nz...",
         "messageId": "messageId", // optional
         "serversText": "- **{name} - {host}**",
