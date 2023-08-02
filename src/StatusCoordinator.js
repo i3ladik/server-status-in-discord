@@ -67,15 +67,17 @@ class StatusCoordinator {
 
         for (const server of servers) {
             const statServer = await (new StatusServer(server, this.config)).init();
-            this.servers.push(statServer);
+            if(statServer) this.servers.push(statServer);
         }
 
-        if (Object.keys(this.bot).length >= 0) {
+        if (Object.keys(this.bot).length > 0) {
+            console.log('Status bot ready');
             this.update();
             setInterval(() => this.update(), update_ms);
         }
 
         fs.writeFileSync('./config.json', JSON.stringify(this.config, null, 4));
+        console.log(`Server-status-in-discord successfully launched. Servers: ${this.servers.length}`);
     }
 
     /**
