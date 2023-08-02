@@ -46,29 +46,33 @@ class StatusCoordinator {
                     return;
                 });
 
-                if(channel){
+                if (channel) {
                     let message;
-    
-                    const statEmbed = createStatMsg(servers, imageUrl, color);
+
+                    const msgObj = createStatMsg(servers, statBot, imageUrl, color);
                     if (hasId(statBot.messageId)) {
                         message = await channel.messages.fetch(statBot.messageId).catch(() => { return; });
-    
-                        if (message) message.edit({ embeds: [statEmbed] });
-                        else message = await channel.send({ embeds: [statEmbed] });
+
+                        if (message) message.edit(msgObj);
+                        else message = await channel.send(msgObj);
                     }
-                    else message = await channel.send({ embeds: [statEmbed] });
-    
+                    else message = await channel.send(msgObj);
+
                     this.message = message;
                     statBot.messageId = message.id;
                 }
             }
 
-            setInterval(() => this.update(), update_ms);
         }
 
         for (const server of servers) {
             const statServer = await (new StatusServer(server, this.config)).init();
             this.servers.push(statServer);
+        }
+
+        if (Object.keys(this.bot).length >= 0) {
+            this.update();
+            setInterval(() => this.update(), update_ms);
         }
 
         fs.writeFileSync('./config.json', JSON.stringify(this.config, null, 4));
@@ -82,10 +86,13 @@ class StatusCoordinator {
 
         let online = 0;
         for (const server of this.servers) {
-            if(!server) continue;
-            online += server.online;
+            if (server) online += server.online;
         }
-        if (online > this.config.maxOnline) this.config.maxOnline = online;
+
+        if (online > this.config.maxOnline) {
+            this.config.maxOnline = online;
+            fs.writeFileSync('./config.json', JSON.stringify(this.config, null, 4));
+        }
         if (this.date.getDay() != new Date().getDay()) {
             this.date = new Date(); this.config.maxOnline = online;
             fs.writeFileSync('./config.json', JSON.stringify(this.config, null, 4));
@@ -100,11 +107,18 @@ class StatusCoordinator {
     }
 }
 
-function createStatMsg(servers, imageUrl, color) {
-    let serversText = '';
-    for (const server of servers) serversText += `- **${server.name} - ${server.host}**\n`;
-    const statEmbed = new EmbedBuilder().setDescription(serversText).setImage(imageUrl).setColor(color);
-    return statEmbed;
+function createStatMsg(servers, statBot, imageUrl, color) {
+    const { banner, serversText } = statBot;
+    const msgObj = { embeds: [] };
+
+    if (banner.startsWith('http')) msgObj.embeds.push(new EmbedBuilder().setImage(banner).setColor(color));
+
+    let text = '';
+    for (const server of servers) text += `${serversText}\n`.replaceAll('{name}', server.name).replaceAll('{host}', server.host);
+
+    msgObj.embeds.push(new EmbedBuilder().setDescription(text).setImage(imageUrl).setColor(color));
+
+    return msgObj;
 }
 
 module.exports = StatusCoordinator;

@@ -17,7 +17,9 @@
     "imageUrl": "https://imgur.com/Yk9EZkj",
     "statBot": {
         "token": "token",
-        "messageId": "messageId"
+        "messageId": "messageId",
+        "serversText": "- **{name} - {host}**",
+        "banner": "https://i.imgur.com/xN4r7PN.png"
     },
     "servers": [
         {

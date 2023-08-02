@@ -20,6 +20,20 @@ const _ = new StatusCoordinator(config);
 
 
 function initConfig(config) {
+    const statBotType = {
+        token: 'token',
+        messageId: 'messageId',
+        serversText: '- **{name} - {host}**',
+        banner: 'https://i.imgur.com/xN4r7PN.png'
+    };
+    const serverType = {
+        name: 'name',
+        host: 'host',
+        token: 'token',
+        messageId: 'messageId',
+        connectUrl: 'leave this message if not'
+    };
+
     config.update_ms = Number(config.update_ms) || 60000;
     config.timeout_ms = Number(config.timeout_ms) || config.update_ms;
     if (config.timeout_ms > config.update_ms) config.timeout_ms = config.update_ms;
@@ -37,11 +51,8 @@ function initConfig(config) {
     config.btnLabel = config.btnLabel || 'Connect';
     config.color = config.color || '#2b2d31';
     config.imageUrl = config.imageUrl || 'https://imgur.com/Yk9EZkj';
-    config.statBot = config.statBot || { token: 'token', messageId: 'messageId' };
-    config.servers = config.servers || [
-        { name: 'name', host: 'host', token: 'token', messageId: 'messageId', connectUrl: 'leave this message if not' },
-        { name: 'name', host: 'host', token: 'token', messageId: 'messageId', connectUrl: 'leave this message if not' }
-    ];
+    config.statBot = config.statBot || statBotType;
+    config.servers = config.servers || [serverType, serverType];
     config.maps = config.maps || { default: { img: 'https://i.imgur.com/QtxEQQE.png', name: 'MAP' } };
     return config;
 }
