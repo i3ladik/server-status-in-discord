@@ -83,28 +83,40 @@ Simple server monitoring in discord<br><br>
 
 ### Node
 
-```npm install```<br>
+```
+npm install
+```
 
-```npm start```
+```
+npm start
+```
 
 ### Docker compose
 
-```docker-compose up --build```
+```
+docker-compose up --build
+```
 
 ## Running in the Background
 
 ### Node
 
 PM2 example<br>
-Install PM2 globally if not done already<br>
-```npm install -g pm2```<br>
+Install PM2 globally if not done already
+```
+npm install -g pm2
+```
 Start your app with PM2:<br>
-```pm2 start index.js -n server-status```
+```
+pm2 start index.js -n server-status
+```
 
 ### Docker compose
 
-Use -d (--detach) flag<br>
-```docker-compose up --build -d```
+Use -d flag<br>
+```
+docker-compose up --build -d
+```
 
 ## Invite bots
 
