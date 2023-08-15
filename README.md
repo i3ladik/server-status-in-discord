@@ -10,7 +10,7 @@ Simple server monitoring in discord<br><br>
 - Day of Defeat
 - The ship<br>
 
-**More info - [here](https://www.npmjs.com/package/@fabricio-191/valve-server-query)**
+**More info - [here](https://www.npmjs.com/package/steam-server-query)**
 
 # How to use
 
@@ -83,13 +83,28 @@ Simple server monitoring in discord<br><br>
 
 ### Node
 
-`npm install`<br>
+```npm install```<br>
 
-`npm start`
+```npm start```
 
 ### Docker compose
 
-`docker-compose up --build`
+```docker-compose up --build```
+
+## Running in the Background
+
+### Node
+
+PM2 example<br>
+Install PM2 globally if not done already<br>
+```npm install -g pm2```<br>
+Start your app with PM2:<br>
+```pm2 start index.js -n server-status```
+
+### Docker compose
+
+Use -d (--detach) flag<br>
+```docker-compose up --build -d```
 
 ## Invite bots
 
