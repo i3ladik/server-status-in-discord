@@ -136,7 +136,7 @@ function createEmbed(info, players, map, avatar, config) {
     }
 
     servEmbed.setFields([
-        { name: playersLabel, value: `\`\`\`${info.players.online}/${info.players.max}\`\`\``, inline: true },
+        { name: playersLabel, value: `\`\`\`${info.players}/${info.maxPlayers}\`\`\``, inline: true },
         { name: '\u200B', value: `\u200B`, inline: true },
         { name: mapLabel, value: `\`\`\`${map.name}\`\`\``, inline: true },
         { name: nicknameLabel, value: `\`\`\`${names}\`\`\``, inline: true },
