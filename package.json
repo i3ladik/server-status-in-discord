@@ -1,6 +1,6 @@
 {
   "name": "server-status-in-discord",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Simple server monitoring in discord",
   "main": "index.js",
   "scripts": {
@@ -10,6 +10,8 @@
   "author": "i3ladik",
   "license": "GPL-3.0-or-later",
   "dependencies": {
+    "canvas": "^2.11.2",
+    "chart.js": "^4.3.3",
     "discord.js": "^14.11.0",
     "steam-server-query": "^1.1.3"
   },
