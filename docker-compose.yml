@@ -6,3 +6,4 @@ services:
             dockerfile: Dockerfile
         volumes:
             - ./config.json:/config.json
+            - ./stats.json:/stats.json
