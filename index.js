@@ -5,8 +5,13 @@ const configPath = './config.json';
 
 let config = {};
 if (fs.existsSync(configPath)) {
-    const data = fs.readFileSync(configPath);
-    config = JSON.parse(data);
+    try {
+        const data = fs.readFileSync(configPath);
+        config = JSON.parse(data);
+    }
+    catch {
+        config = {};
+    }
 }
 
 config = initConfig(config);
@@ -32,11 +37,12 @@ function initConfig(config) {
         token: 'token',
         messageId: 'messageId',
         buttons: [
-            { emoji: '👇', label: 'Connect', url: 'leave this if not'},
-            { emoji: '', label: 'Site', url: 'leave this if not'}
+            { emoji: '👇', label: 'Connect', url: 'leave this if not' },
+            { emoji: '', label: 'Site', url: 'leave this if not' }
         ]
     };
 
+    if (typeof config.useGraphs !== 'boolean') config.useGraphs = true;
     config.update_ms = Number(config.update_ms) || 60000;
     config.timeout_ms = Number(config.timeout_ms) || config.update_ms;
     if (config.timeout_ms > config.update_ms) config.timeout_ms = config.update_ms;
