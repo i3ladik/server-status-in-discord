@@ -1,4 +1,4 @@
-const { Client, ActivityType, OAuth2Scopes, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
+const { Client, ActivityType, OAuth2Scopes, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, AttachmentBuilder } = require('discord.js');
 const { queryGameServerInfo, queryGameServerPlayer } = require('steam-server-query');
 
 const hasId = (input) => /^\d+$/.test(input);
@@ -11,9 +11,10 @@ class StatusServer {
     * @param {object} serverData - server data
     * @param {object} config - config
     */
-    constructor(serverData, config) {
+    constructor(coordinator, serverData) {
+        this.coordinator = coordinator;
         this.serverData = serverData;
-        this.config = config;
+        this.config = coordinator.config;
         this.host = serverData.host;
         this.bot = {};
         this.message = {};
@@ -71,7 +72,7 @@ class StatusServer {
     * Updating server info
     */
     async update() {
-        const { maps, statusMsg, unavailableMsg, timeout_ms } = this.config;
+        const { useGraphs, maps, statusMsg, unavailableMsg, timeout_ms } = this.config;
         const timeout = Number(timeout_ms);
 
         try {
@@ -90,11 +91,17 @@ class StatusServer {
 
             const { players } = await queryGameServerPlayer(this.host, 1, timeout);
 
-            const msgObject = createServMsg(info, players, map, this.bot.user.avatarURL(), this.config, this.serverData.buttons);
+            let image;
+            if (useGraphs) image = this.coordinator.writeStat(this.host, info.players, info.maxPlayers);
+            else image = this.config.imageUrl;
+
+            const msgObject = createServMsg(info, players, map, this.bot.user.avatarURL(), this.config, this.serverData.buttons, image);
             this.message.edit(msgObject);
         }
-        catch {
-            console.error(`Error.${this.host}: wrong server host or off`);
+        catch (e) {
+            console.error(e);
+            console.error(`${e}\nError ${this.host} maybe wrong server host or off`);
+            this.coordinator.writeStat(this.host, 0);
             this.bot.user.setPresence({ activities: [{ type: ActivityType.Watching, name: unavailableMsg }], status: 'dnd' });
 
         }
@@ -108,11 +115,15 @@ function getMap(map, maps) {
     return maps.default;
 }
 
-function createServMsg(info, players, map, avatar, config, buttons) {
-    const msgObj = { embeds: [], components: [] };
+function createServMsg(info, players, map, avatar, config, buttons, image) {
+    const msgObj = { embeds: [], components: [], files: [] };
 
-    const servEmbed = createEmbed(info, players, map, avatar, config);
-    msgObj.embeds.push(servEmbed);
+    if (typeof image === 'string') msgObj.embeds.push(createEmbed(info, players, map, avatar, config, image));
+    else {
+        const imgAttch = new AttachmentBuilder(image, { name: 'stat.png' });
+        msgObj.embeds.push(createEmbed(info, players, map, avatar, config, imgAttch.name));
+        msgObj.files.push(imgAttch);
+    }
 
     const aRow = new ActionRowBuilder();
     const buttonComps = createButtons(buttons);
@@ -123,10 +134,12 @@ function createServMsg(info, players, map, avatar, config, buttons) {
     return msgObj;
 }
 
-function createEmbed(info, players, map, avatar, config) {
-    const { imageUrl, color, playersLabel, mapLabel, nicknameLabel, scoreLabel, footerText } = config;
+function createEmbed(info, players, map, avatar, config, image) {
+    const { color, playersLabel, mapLabel, nicknameLabel, scoreLabel, footerText } = config;
 
-    const servEmbed = new EmbedBuilder().setImage(imageUrl).setColor(color);
+    const servEmbed = new EmbedBuilder().setColor(color);
+    if (image.startsWith('http')) servEmbed.setImage(image);
+    else servEmbed.setImage(`attachment://${image}`);
 
     const sorted = players.sort((a, b) => (a.score > b.score) ? -1 : ((b.score > a.score) ? 1 : 0));
     let names = '', scores = '';

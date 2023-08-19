@@ -1,7 +1,10 @@
 const { Client, ActivityType, OAuth2Scopes, EmbedBuilder } = require('discord.js');
 const StatusServer = require('./StatusServer.js');
+const { createCanvas } = require('canvas');
+const Chart = require('chart.js/auto');
 const fs = require('fs');
 
+const statsPath = `./stats.json`;
 const hasId = (input) => /^\d+$/.test(input);
 
 /**
@@ -19,6 +22,7 @@ class StatusCoordinator {
         this.bot = {};
         this.message = {};
         this.servers = [];
+        this.stats = {};
 
         this.init();
     }
@@ -27,7 +31,21 @@ class StatusCoordinator {
     * Initializing coordinator
     */
     async init() {
-        const { statBot, startMsg, channelId, servers, update_ms } = this.config;
+        const { useGraphs, statBot, startMsg, channelId, servers, update_ms } = this.config;
+
+        if (useGraphs) {
+            if (fs.existsSync(statsPath)) {
+                try {
+                    const data = fs.readFileSync(statsPath);
+                    this.stats = JSON.parse(data);
+                }
+                catch {
+                    this.stats = {};
+                }
+            }
+            setInterval(() => fs.writeFileSync(statsPath, JSON.stringify(this.stats, null, 4)), update_ms);
+        }
+
 
         if (statBot.token.length > 10) {
             const client = new Client({ intents: [] });
@@ -66,8 +84,8 @@ class StatusCoordinator {
         }
 
         for (const server of servers) {
-            const statServer = await (new StatusServer(server, this.config)).init();
-            if(statServer) this.servers.push(statServer);
+            const statServer = await (new StatusServer(this, server)).init();
+            if (statServer) this.servers.push(statServer);
         }
 
         if (Object.keys(this.bot).length > 0) {
@@ -107,6 +125,77 @@ class StatusCoordinator {
             }], status: 'online'
         });
     }
+
+    writeStat(serverHost, online, maxOnline = 24) {
+        if (!this.stats[serverHost]) this.stats[serverHost] = {};
+        let serverStat = this.stats[serverHost];
+        const time = (roundToHour(new Date())).getTime();
+        if (!serverStat[time] || serverStat[time] < online) serverStat[time] = online;
+
+        //sort and clear 24h interval
+        const timeEntries = Object.entries(serverStat).map(([timestamp, value]) => [parseInt(timestamp), value]);
+        timeEntries.sort((a, b) => a[0] - b[0]);
+        const filteredTimeEntries = timeEntries.filter(([timestamp, value]) => time - timestamp <= 24 * 60 * 60 * 1000);
+        serverStat = Object.fromEntries(filteredTimeEntries);
+
+        const canvas = createCanvas(689, 200);
+        const ctx = canvas.getContext('2d');
+
+        const labels = [];
+        const onlines = [];
+        for (const statTime in serverStat) {
+            labels.push(dateToTimeString(statTime));
+            onlines.push(serverStat[statTime]);
+        }
+
+        const _ = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'Players',
+                        data: onlines,
+                        borderColor: 'blue',
+                        backgroundColor: 'rgba(0, 0, 255, 0.2)',
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    x: { ticks: { color: 'white' } },
+                    y: {
+                        axis: 'y',
+                        max: maxOnline,
+                        min: 0,
+                        ticks: { color: 'white' }
+                    }
+                },
+                plugins: {
+                    legend: { labels: { color: 'white' } }
+                }
+            }
+        });
+
+        const buffer = canvas.toBuffer('image/png');
+        return buffer;
+    }
+}
+
+function roundToHour(date) {
+    date.setMinutes(0);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+
+    return date;
+}
+
+function dateToTimeString(time) {
+    const date = new Date(parseInt(time));
+    const hours = date.getHours();
+
+    return `${hours}h`;
 }
 
 function createStatMsg(servers, statBot, imageUrl, color) {
