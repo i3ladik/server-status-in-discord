@@ -8,10 +8,16 @@ RUN apk --no-cache add \
     cairo-dev \
     pango-dev \
     jpeg-dev \
-    giflib-dev
+    giflib-dev \
+    fontconfig-dev
 
 WORKDIR /
 COPY package*.json ./
 RUN npm install
 COPY . .
+
+RUN apk add --no-cache msttcorefonts-installer fontconfig && \
+    update-ms-fonts && \
+    fc-cache -f
+
 CMD [ "npm", "start" ]
