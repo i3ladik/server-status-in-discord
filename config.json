@@ -1,5 +1,6 @@
 {
     "useGraphs": true,
+    "countBots": true,
     "update_ms": 60000,
     "timeout_ms": 60000,
     "maxOnline": 0,
