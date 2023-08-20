@@ -1,6 +1,6 @@
 {
   "name": "server-status-in-discord",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Simple server monitoring in discord",
   "main": "index.js",
   "scripts": {
