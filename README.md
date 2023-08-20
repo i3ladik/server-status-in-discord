@@ -20,6 +20,8 @@ Simple server monitoring in discord<br><br>
 
 ```
 {
+    "useGraphs": true,
+    "countBots": true,
     "update_ms": 60000,
     "timeout_ms": 30000,
     "maxOnline": 0,
@@ -132,6 +134,7 @@ Add all bots and restart
 
 # Result
 
-![Status ](https://i.imgur.com/08qqV39.png)<br>
-
-![Monitoring messages](https://i.imgur.com/s5xeYLQ.png)
+![Status](https://i.imgur.com/08qqV39.png)<br>
+![Stat bot message](https://i.imgur.com/JPRhLxg.png)<br>
+![First server message](https://i.imgur.com/w1scWHb.png)<br>
+![Second server message](https://i.imgur.com/cGSloLw.png)<br>
