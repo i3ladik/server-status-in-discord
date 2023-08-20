@@ -43,6 +43,7 @@ function initConfig(config) {
     };
 
     if (typeof config.useGraphs !== 'boolean') config.useGraphs = true;
+    if (typeof config.countBots !== 'boolean') config.countBots = true;
     config.update_ms = Number(config.update_ms) || 60000;
     config.timeout_ms = Number(config.timeout_ms) || config.update_ms;
     if (config.timeout_ms > config.update_ms) config.timeout_ms = config.update_ms;
