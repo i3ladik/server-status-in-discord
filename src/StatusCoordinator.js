@@ -1,4 +1,4 @@
-const { Client, ActivityType, OAuth2Scopes, EmbedBuilder } = require('discord.js');
+const { Client, ActivityType, OAuth2Scopes, EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const StatusServer = require('./StatusServer.js');
 const { createCanvas } = require('canvas');
 const Chart = require('chart.js/auto');
@@ -23,6 +23,7 @@ class StatusCoordinator {
         this.servers = [];
         this.graphStats = {};
         this.graphBuffer = {};
+        this.message = {};
 
         this.init();
     }
@@ -70,6 +71,7 @@ class StatusCoordinator {
                         else statMessage = await channel.send(msgObj);
                     }
                     else statMessage = await channel.send(msgObj);
+                    this.message = statMessage;
                     statBot.messageId = statMessage.id;
                 }).catch(() => {
                     console.log('Stats bot: I didnt find the channel. Maybe I was not invited to the server or permissions in channel not given. Restart after fix');
@@ -100,10 +102,13 @@ class StatusCoordinator {
     */
     async update() {
         const { statusBotMsg } = this.config;
+        const { generalGraph } = this.config.graph;
 
         let online = 0;
+        let serversMOnline = 0;
         for (const server of this.servers) {
             if (server) online += server.online;
+            serversMOnline += server.maxOnline;
         }
 
         if (this.date.getDay() != new Date().getDay()) {
@@ -121,32 +126,62 @@ class StatusCoordinator {
                 name: statusBotMsg.replaceAll('{online}', online).replaceAll('{max}', this.config.maxOnline)
             }], status: 'online'
         });
+
+        // Update general graph
+        if (Object.keys(this.message).length === 0 || !generalGraph) return;
+        const graph = this.writeAndGetGraph('general', online, serversMOnline, true);
+        const graphAttch = new AttachmentBuilder(graph, { name: 'graph.png' });
+
+        let generalEmbed = {};
+        const embeds = [];
+        if (this.message.embeds.length == 2) {
+            embeds.push(this.message.embeds[0]);
+            generalEmbed = new EmbedBuilder(this.message.embeds[1]);
+        }
+        else generalEmbed = new EmbedBuilder(this.message.embeds[0]);
+        generalEmbed.setImage(`attachment://${graphAttch.name}`);
+        embeds.push(generalEmbed);
+
+        this.message.edit({ embeds, files: [graphAttch] });
+
     }
 
     /**
     * Writing statistics data and getting a graph
     */
-    writeAndGetGraph(serverHost, online, maxOnline = 24) {
+    writeAndGetGraph(serverHost, online, maxOnline = 24, forceEdit = false) {
+        const { borderColor, backgroundColor, scalesColor, timeLabel, timeNow } = this.config.graph;
+
         // Create server stats data and write
         if (!this.graphStats[serverHost]) this.graphStats[serverHost] = {};
         const time = (roundToHour(new Date())).getTime();
         let serverStat = this.graphStats[serverHost];
 
+        let updated = false;
+        if (!serverStat[time] || serverStat[time] < online) {
+            serverStat[time] = online;
+            updated = true;
+        }
+
         // Sort and clear 24h interval
         const timeEntries = Object.entries(serverStat).map(([timestamp, value]) => [parseInt(timestamp), value]);
         timeEntries.sort((a, b) => a[0] - b[0]);
-        const filteredTimeEntries = timeEntries.filter(([timestamp, value]) => time - timestamp <= 23 * 60 * 60 * 1000);
+        const filteredTimeEntries = timeEntries.filter(([timestamp, value]) => time - timestamp <= 24 * 60 * 60 * 1000);
         serverStat = Object.fromEntries(filteredTimeEntries);
 
-        if (Object.keys(this.graphBuffer).length === 0 || !serverStat[time] || serverStat[time] < online) {
-            serverStat[time] = online;
-
+        if (!this.graphBuffer[serverHost] || forceEdit || updated) {
             // Creating graph
-            const labels = [];
             const onlines = [];
             for (const statTime in serverStat) {
-                labels.push(dateToTimeString(statTime));
                 onlines.push(serverStat[statTime]);
+            }
+            while (onlines.length < 25) onlines.unshift(null);
+
+            const labels = [];
+            const intervals = [24, 18, 12, 6, 0];
+            for (const interval of intervals) {
+                if (interval === 0) labels.push(timeNow);
+                else labels.push(timeLabel.replaceAll('{time}', interval), '', '', '', '', '');
             }
 
             const canvas = createCanvas(689, 200);
@@ -157,36 +192,35 @@ class StatusCoordinator {
                     labels,
                     datasets: [
                         {
-                            label: 'Players',
                             data: onlines,
-                            borderColor: 'blue',
-                            backgroundColor: 'rgba(0, 0, 255, 0.2)',
+                            borderColor,
+                            backgroundColor,
                             fill: true
                         }
                     ]
                 },
                 options: {
                     scales: {
-                        x: { ticks: { color: 'white' } },
+                        x: { ticks: { color: scalesColor } },
                         y: {
                             axis: 'y',
                             max: maxOnline + 1,
                             min: 0,
-                            ticks: { color: 'white' }
+                            ticks: { color: scalesColor }
                         }
                     },
                     plugins: {
-                        legend: { labels: { color: 'white' } }
+                        legend: { display: false }
                     }
                 }
             });
-            this.graphBuffer = canvas.toBuffer('image/png');
+            this.graphBuffer[serverHost] = canvas.toBuffer('image/png');
 
             chart.destroy();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
-        return this.graphBuffer;
+        return this.graphBuffer[serverHost];
     }
 }
 
@@ -196,13 +230,6 @@ function roundToHour(date) {
     date.setMilliseconds(0);
 
     return date;
-}
-
-function dateToTimeString(time) {
-    const date = new Date(parseInt(time));
-    const hours = date.getHours();
-
-    return `${hours}h`;
 }
 
 function createStatMsg(servers, statBot, imageUrl, color) {

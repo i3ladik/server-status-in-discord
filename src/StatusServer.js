@@ -20,6 +20,7 @@ class StatusServer {
         this.serverBot = {};
         this.message = {};
         this.online = 0;
+        this.maxOnline = 0;
     }
 
     /**
@@ -81,15 +82,14 @@ class StatusServer {
 
         const { info, players } = server;
 
-        const online = countBots ? info.players : info.players - info.bots;
-        const maxOnline = countBots ? info.maxPlayers : info.maxPlayers - info.bots;
+        this.online = countBots ? info.players : info.players - info.bots;
+        this.maxOnline = countBots ? info.maxPlayers : info.maxPlayers - info.bots;
 
-        this.online = online;
         const map = getMap(info.map, maps);
         this.serverBot.user.setPresence({
             activities: [{
                 type: ActivityType.Playing,
-                name: statusMsg.replaceAll('{online}', online).replaceAll('{max}', maxOnline).replaceAll('{map}', map.name)
+                name: statusMsg.replaceAll('{online}', this.online).replaceAll('{max}', this.maxOnline).replaceAll('{map}', map.name)
             }],
             status: 'online'
         });
@@ -97,10 +97,10 @@ class StatusServer {
         if (Object.keys(this.message).length === 0) return;
 
         let image;
-        if (useGraphs) image = this.coordinator.writeAndGetGraph(this.host, online, maxOnline);
+        if (useGraphs) image = this.coordinator.writeAndGetGraph(this.host, this.online, this.maxOnline);
         else image = this.config.imageUrl;
 
-        const msgObject = createServMsg(online, maxOnline, players, map, this.serverBot.user.avatarURL(), this.config, this.serverData.buttons, image);
+        const msgObject = createServMsg(this.online, this.maxOnline, players, map, this.serverBot.user.avatarURL(), this.config, this.serverData.buttons, image);
         await this.message.edit(msgObject);
     }
 }
@@ -132,9 +132,9 @@ function createServMsg(online, maxOnline, players, map, avatar, config, buttons,
 
     if (typeof image === 'string') msgObj.embeds.push(createEmbed(online, maxOnline, players, map, avatar, config, image));
     else {
-        const imgAttch = new AttachmentBuilder(image, { name: 'graph.png' });
-        msgObj.embeds.push(createEmbed(online, maxOnline, players, map, avatar, config, imgAttch.name));
-        msgObj.files.push(imgAttch);
+        const graphAttch = new AttachmentBuilder(image, { name: 'graph.png' });
+        msgObj.embeds.push(createEmbed(online, maxOnline, players, map, avatar, config, graphAttch.name));
+        msgObj.files.push(graphAttch);
     }
 
     const aRow = new ActionRowBuilder();
