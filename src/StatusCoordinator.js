@@ -163,13 +163,13 @@ class StatusCoordinator {
             updated = true;
         }
 
-        // Sort and clear 24h interval
-        const timeEntries = Object.entries(serverStat).map(([timestamp, value]) => [parseInt(timestamp), value]);
-        timeEntries.sort((a, b) => a[0] - b[0]);
-        const filteredTimeEntries = timeEntries.filter(([timestamp, value]) => time - timestamp <= 24 * 60 * 60 * 1000);
-        serverStat = Object.fromEntries(filteredTimeEntries);
-
         if (!this.graphBuffer[serverHost] || forceEdit || updated) {
+            // Sort and clear 24h interval
+            const timeEntries = Object.entries(serverStat).map(([timestamp, value]) => [parseInt(timestamp), value]);
+            timeEntries.sort((a, b) => a[0] - b[0]);
+            const filteredTimeEntries = timeEntries.filter(([timestamp, value]) => time - timestamp <= 24 * 60 * 60 * 1000);
+            serverStat = Object.fromEntries(filteredTimeEntries);
+
             // Creating graph
             const onlines = [];
             for (const statTime in serverStat) {
