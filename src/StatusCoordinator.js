@@ -4,7 +4,7 @@ const { createCanvas } = require('canvas');
 const Chart = require('chart.js/auto');
 const fs = require('fs');
 
-const statsPath = `./stats.json`;
+const graphStatsPath = `./graphStats.json`;
 const hasId = (input) => /^\d+$/.test(input);
 
 /**
@@ -19,10 +19,10 @@ class StatusCoordinator {
     constructor(config) {
         this.config = config;
         this.date = new Date();
-        this.bot = {};
-        this.message = {};
+        this.coordinatorBot = {};
         this.servers = [];
-        this.stats = {};
+        this.graphStats = {};
+        this.graphBuffer = {};
 
         this.init();
     }
@@ -33,62 +33,59 @@ class StatusCoordinator {
     async init() {
         const { useGraphs, statBot, startMsg, channelId, servers, update_ms } = this.config;
 
+        // Read or create graphs file
         if (useGraphs) {
-            if (fs.existsSync(statsPath)) {
+            if (fs.existsSync(graphStatsPath)) {
                 try {
-                    const data = fs.readFileSync(statsPath);
-                    this.stats = JSON.parse(data);
+                    const data = fs.readFileSync(graphStatsPath);
+                    this.graphStats = JSON.parse(data);
                 }
                 catch {
-                    this.stats = {};
+                    this.graphStats = {};
                 }
             }
-            setInterval(() => fs.writeFileSync(statsPath, JSON.stringify(this.stats, null, 4)), update_ms);
+            setInterval(() => fs.writeFileSync(graphStatsPath, JSON.stringify(this.graphStats, null, 4)), update_ms);
         }
 
-
+        // Stat bot init
         if (statBot.token.length > 10) {
-            const client = new Client({ intents: [] });
-            await client.login(statBot.token);
-            client.user.setPresence({ activities: [{ type: ActivityType.Watching, name: startMsg }], status: 'idle' });
-            this.bot = client;
+            this.coordinatorBot = new Client({ intents: [] });
+            await this.coordinatorBot.login(statBot.token);
+            this.coordinatorBot.user.setPresence({ activities: [{ type: ActivityType.Watching, name: startMsg }], status: 'idle' });
 
-            const link = client.generateInvite({ scopes: [OAuth2Scopes.Bot] });
+            const link = this.coordinatorBot.generateInvite({ scopes: [OAuth2Scopes.Bot] });
             console.log(`Stats bot invite link: ${link}`);
 
             if (hasId(channelId)) {
                 const { imageUrl, color } = this.config;
 
-                const channel = await client.channels.fetch(channelId).catch(() => {
-                    console.log('Stats bot: I didnt find the channel. Maybe I was not invited to the server or permissions in channel not given. Restart after fix');
-                    return;
-                });
-
-                if (channel) {
-                    let message;
-
+                await this.coordinatorBot.channels.fetch(channelId).then(async channel => {
+                    let statMessage;
                     const msgObj = createStatMsg(servers, statBot, imageUrl, color);
+
                     if (hasId(statBot.messageId)) {
-                        message = await channel.messages.fetch(statBot.messageId).catch(() => { return; });
+                        statMessage = await channel.messages.fetch(statBot.messageId).catch(() => { return; });
 
-                        if (message) message.edit(msgObj);
-                        else message = await channel.send(msgObj);
+                        if (statMessage) statMessage.edit(msgObj);
+                        else statMessage = await channel.send(msgObj);
                     }
-                    else message = await channel.send(msgObj);
-
-                    this.message = message;
-                    statBot.messageId = message.id;
-                }
+                    else statMessage = await channel.send(msgObj);
+                    statBot.messageId = statMessage.id;
+                }).catch(() => {
+                    console.log('Stats bot: I didnt find the channel. Maybe I was not invited to the server or permissions in channel not given. Restart after fix');
+                });
             }
 
         }
 
-        for (const server of servers) {
-            const statServer = await (new StatusServer(this, server)).init();
+        // Servers stats bots init
+        for (let serverNumber = 0; serverNumber < servers.length; serverNumber++) {
+            const statServer = await (new StatusServer(this, serverNumber)).init();
             if (statServer) this.servers.push(statServer);
         }
 
-        if (Object.keys(this.bot).length > 0) {
+        // Check if stat bot enabled
+        if (Object.keys(this.coordinatorBot).length > 0) {
             console.log('Status bot ready');
             this.update();
             setInterval(() => this.update(), update_ms);
@@ -109,16 +106,16 @@ class StatusCoordinator {
             if (server) online += server.online;
         }
 
-        if (online > this.config.maxOnline) {
-            this.config.maxOnline = online;
-            fs.writeFileSync('./config.json', JSON.stringify(this.config, null, 4));
-        }
         if (this.date.getDay() != new Date().getDay()) {
             this.date = new Date(); this.config.maxOnline = online;
             fs.writeFileSync('./config.json', JSON.stringify(this.config, null, 4));
         }
+        else if (online > this.config.maxOnline) {
+            this.config.maxOnline = online;
+            fs.writeFileSync('./config.json', JSON.stringify(this.config, null, 4));
+        }
 
-        this.bot.user.setPresence({
+        this.coordinatorBot.user.setPresence({
             activities: [{
                 type: ActivityType.Watching,
                 name: statusBotMsg.replaceAll('{online}', online).replaceAll('{max}', this.config.maxOnline)
@@ -126,60 +123,70 @@ class StatusCoordinator {
         });
     }
 
-    writeStat(serverHost, online, maxOnline = 24) {
-        if (!this.stats[serverHost]) this.stats[serverHost] = {};
-        let serverStat = this.stats[serverHost];
+    /**
+    * Writing statistics data and getting a graph
+    */
+    writeAndGetGraph(serverHost, online, maxOnline = 24) {
+        // Create server stats data and write
+        if (!this.graphStats[serverHost]) this.graphStats[serverHost] = {};
         const time = (roundToHour(new Date())).getTime();
-        if (!serverStat[time] || serverStat[time] < online) serverStat[time] = online;
+        let serverStat = this.graphStats[serverHost];
 
-        //sort and clear 24h interval
+        // Sort and clear 24h interval
         const timeEntries = Object.entries(serverStat).map(([timestamp, value]) => [parseInt(timestamp), value]);
         timeEntries.sort((a, b) => a[0] - b[0]);
-        const filteredTimeEntries = timeEntries.filter(([timestamp, value]) => time - timestamp <= 24 * 60 * 60 * 1000);
+        const filteredTimeEntries = timeEntries.filter(([timestamp, value]) => time - timestamp <= 23 * 60 * 60 * 1000);
         serverStat = Object.fromEntries(filteredTimeEntries);
 
-        const canvas = createCanvas(689, 200);
-        const ctx = canvas.getContext('2d');
+        if (Object.keys(this.graphBuffer).length === 0 || !serverStat[time] || serverStat[time] < online) {
+            serverStat[time] = online;
 
-        const labels = [];
-        const onlines = [];
-        for (const statTime in serverStat) {
-            labels.push(dateToTimeString(statTime));
-            onlines.push(serverStat[statTime]);
+            // Creating graph
+            const labels = [];
+            const onlines = [];
+            for (const statTime in serverStat) {
+                labels.push(dateToTimeString(statTime));
+                onlines.push(serverStat[statTime]);
+            }
+
+            const canvas = createCanvas(689, 200);
+            const ctx = canvas.getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Players',
+                            data: onlines,
+                            borderColor: 'blue',
+                            backgroundColor: 'rgba(0, 0, 255, 0.2)',
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        x: { ticks: { color: 'white' } },
+                        y: {
+                            axis: 'y',
+                            max: maxOnline + 1,
+                            min: 0,
+                            ticks: { color: 'white' }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: 'white' } }
+                    }
+                }
+            });
+            this.graphBuffer = canvas.toBuffer('image/png');
+
+            chart.destroy();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
 
-        const _ = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels,
-                datasets: [
-                    {
-                        label: 'Players',
-                        data: onlines,
-                        borderColor: 'blue',
-                        backgroundColor: 'rgba(0, 0, 255, 0.2)',
-                        fill: true
-                    }
-                ]
-            },
-            options: {
-                scales: {
-                    x: { ticks: { color: 'white' } },
-                    y: {
-                        axis: 'y',
-                        max: maxOnline,
-                        min: 0,
-                        ticks: { color: 'white' }
-                    }
-                },
-                plugins: {
-                    legend: { labels: { color: 'white' } }
-                }
-            }
-        });
-
-        const buffer = canvas.toBuffer('image/png');
-        return buffer;
+        return this.graphBuffer;
     }
 }
 
