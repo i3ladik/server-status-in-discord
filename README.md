@@ -73,7 +73,7 @@ Simple server monitoring in discord<br><br>
     "maps": {
         "default": { "img": "https://i.imgur.com/QtxEQQE.png", "name": "MAP" },
         "mirage": {
-            "img": "https://images-ext-2.discordapp.net/external/9BNYH9kMkxmN-p3TX7cZrP2TfUEWP0k03zO9JAff_aw/https/developer.valvesoftware.com/w/images/6/68/De_mirage.png",
+            "img": "https://developer.valvesoftware.com/w/images/6/68/De_mirage.png",
             "name": "MIRAGE"
         },
         ...
