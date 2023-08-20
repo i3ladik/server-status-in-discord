@@ -1,5 +1,13 @@
 {
     "useGraphs": true,
+    "graph": {
+        "generalGraph": true,
+        "borderColor": "blue",
+        "backgroundColor": "rgba(0, 0, 255, 0.2)",
+        "scalesColor": "white",
+        "timeLabel": "{time}h",
+        "timeNow": "Now"
+    },
     "countBots": true,
     "update_ms": 60000,
     "timeout_ms": 60000,

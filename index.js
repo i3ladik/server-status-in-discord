@@ -41,8 +41,17 @@ function initConfig(config) {
             { emoji: '', label: 'Site', url: 'leave this if not' }
         ]
     };
+    const graph = {
+        generalGraph: true,
+        borderColor: 'blue',
+        backgroundColor: 'rgba(0, 0, 255, 0.2)',
+        scalesColor: 'white',
+        timeLabel: '{time}h',
+        timeNow: 'Now'
+    }
 
     if (typeof config.useGraphs !== 'boolean') config.useGraphs = true;
+    config.graph = config.graph || graph;
     if (typeof config.countBots !== 'boolean') config.countBots = true;
     config.update_ms = Number(config.update_ms) || 60000;
     config.timeout_ms = Number(config.timeout_ms) || config.update_ms;
