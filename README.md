@@ -21,6 +21,14 @@ Simple server monitoring in discord<br><br>
 ```
 {
     "useGraphs": true,
+    "graph": {
+        "generalGraph": true,
+        "borderColor": "blue",
+        "backgroundColor": "rgba(0, 0, 255, 0.2)",
+        "scalesColor": "white",
+        "timeLabel": "{time}h",
+        "timeNow": "Now"
+    },
     "countBots": true,
     "update_ms": 60000,
     "timeout_ms": 30000,
@@ -134,7 +142,4 @@ Add all bots and restart
 
 # Result
 
-![Status](https://i.imgur.com/08qqV39.png)<br>
-![Stat bot message](https://i.imgur.com/JPRhLxg.png)<br>
-![First server message](https://i.imgur.com/w1scWHb.png)<br>
-![Second server message](https://i.imgur.com/cGSloLw.png)<br>
+![Result](https://i.imgur.com/OPCFqaS.png)
