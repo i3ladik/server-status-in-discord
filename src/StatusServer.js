@@ -34,7 +34,7 @@ class StatusServer {
 
         this.serverBot = new Client({ intents: [] });
         await this.serverBot.login(token);
-        this.serverBot.user.setPresence({ activities: [{ type: ActivityType.Watching, name: startMsg }], status: 'idle' });
+        this.serverBot.user.setPresence({ activities: [{ type: ActivityType.Custom, name: startMsg }], status: 'idle' });
 
         const link = this.serverBot.generateInvite({ scopes: [OAuth2Scopes.Bot] });
         console.log(`Stats ${name} bot invite link: ${link}`);
@@ -76,7 +76,7 @@ class StatusServer {
         const server = await getInfoAndPlayers(this.host, timeout);
         if (!server) {
             this.coordinator.writeAndGetGraph(this.host, 0);
-            this.serverBot.user.setPresence({ activities: [{ type: ActivityType.Watching, name: unavailableMsg }], status: 'dnd' });
+            this.serverBot.user.setPresence({ activities: [{ type: ActivityType.Custom, name: unavailableMsg }], status: 'dnd' });
             return;
         }
 
@@ -88,7 +88,7 @@ class StatusServer {
         const map = getMap(info.map, maps);
         this.serverBot.user.setPresence({
             activities: [{
-                type: ActivityType.Playing,
+                type: ActivityType.Custom,
                 name: statusMsg.replaceAll('{online}', this.online).replaceAll('{max}', this.maxOnline).replaceAll('{map}', map.name)
             }],
             status: 'online'
