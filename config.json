@@ -13,10 +13,10 @@
     "timeout_ms": 60000,
     "maxOnline": 0,
     "channelId": "channelId",
-    "startMsg": "starting...",
-    "statusMsg": "{online}/{max} on {map}",
-    "statusBotMsg": "online: {online} Max: {max}",
-    "unavailableMsg": "unavailable...",
+    "startMsg": "Starting...",
+    "statusMsg": "Players {online}/{max} on {map}",
+    "statusBotMsg": "Online: {online} Max online: {max}",
+    "unavailableMsg": "Unavailable...",
     "playersLabel": "Players 👥",
     "mapLabel": "Map 🗺️",
     "nicknameLabel": "Nickname 📛",
@@ -28,6 +28,7 @@
         "token": "token",
         "messageId": "messageId",
         "serversText": "- **{name} - {host}**",
+        "additionalInfo": "\nLocation - your location (leave it clean if its not necessary)",
         "banner": "https://i.imgur.com/xN4r7PN.png"
     },
     "servers": [
