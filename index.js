@@ -29,6 +29,7 @@ function initConfig(config) {
         token: 'token',
         messageId: 'messageId',
         serversText: '- **{name} - {host}**',
+        additionalInfo: '\nLocation - your location (leave it clean if its not necessary)',
         banner: 'https://i.imgur.com/xN4r7PN.png'
     };
     const serverType = {
@@ -58,10 +59,10 @@ function initConfig(config) {
     if (config.timeout_ms > config.update_ms) config.timeout_ms = config.update_ms;
     config.maxOnline = config.maxOnline || 0;
     config.channelId = config.channelId || 'channelId';
-    config.startMsg = config.startMsg || 'starting...';
-    config.statusMsg = config.statusMsg || '{online}/{max} on {map}';
-    config.statusBotMsg = config.statusBotMsg || 'online: {online} Max: {max}';
-    config.unavailableMsg = config.unavailableMsg || 'unavailable...';
+    config.startMsg = config.startMsg || 'Starting...';
+    config.statusMsg = config.statusMsg || 'Players {online}/{max} on {map}';
+    config.statusBotMsg = config.statusBotMsg || 'Online: {online} Max online: {max}';
+    config.unavailableMsg = config.unavailableMsg || 'Unavailable...';
     config.playersLabel = config.playersLabel || 'Players 👥';
     config.mapLabel = config.mapLabel || 'Map 🗺️';
     config.nicknameLabel = config.nicknameLabel || 'Nickname 📛';
