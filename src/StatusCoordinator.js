@@ -33,9 +33,10 @@ class StatusCoordinator {
     */
     async init() {
         const { useGraphs, statBot, startMsg, channelId, servers, update_ms } = this.config;
+        const { generalGraph } = this.config.graph;
 
         // Read or create graphs file
-        if (useGraphs) {
+        if (useGraphs || generalGraph) {
             if (fs.existsSync(graphStatsPath)) {
                 try {
                     const data = fs.readFileSync(graphStatsPath);
@@ -106,9 +107,11 @@ class StatusCoordinator {
 
         let online = 0;
         let serversMOnline = 0;
+        let doNotUpdate = false;
         for (const server of this.servers) {
             if (server) online += server.online;
             serversMOnline += server.maxOnline;
+            if (server.maxOnline === 0) doNotUpdate = true;
         }
 
         if (this.date.getDay() != new Date().getDay()) {
@@ -128,8 +131,8 @@ class StatusCoordinator {
         });
 
         // Update general graph
-        if (Object.keys(this.message).length === 0 || !generalGraph) return;
-        const graph = this.writeAndGetGraph('general', online, serversMOnline, true);
+        if (Object.keys(this.message).length === 0 || !generalGraph || doNotUpdate) return;
+        const graph = this.writeAndGetGraph('general', online, serversMOnline);
         const graphAttch = new AttachmentBuilder(graph, { name: 'graph.png' });
 
         let generalEmbed = {};
@@ -149,26 +152,22 @@ class StatusCoordinator {
     /**
     * Writing statistics data and getting a graph
     */
-    writeAndGetGraph(serverHost, online, maxOnline = 24, forceEdit = false) {
+    writeAndGetGraph(serverHost, online, maxOnline = 24) {
         const { borderColor, backgroundColor, scalesColor, timeLabel, timeNow } = this.config.graph;
 
-        // Create server stats data and write
         if (!this.graphStats[serverHost]) this.graphStats[serverHost] = {};
         const time = (roundToHour(new Date())).getTime();
-        let serverStat = this.graphStats[serverHost];
 
-        let updated = false;
-        if (!serverStat[time] || serverStat[time] < online) {
+        // Sort and clear 24h interval
+        const timeEntries = Object.entries(this.graphStats[serverHost]).map(([timestamp, value]) => [parseInt(timestamp), value]);
+        timeEntries.sort((a, b) => a[0] - b[0]);
+        const filteredTimeEntries = timeEntries.filter(([timestamp, value]) => time - timestamp <= 24 * 60 * 60 * 1000);
+        this.graphStats[serverHost] = Object.fromEntries(filteredTimeEntries);
+
+        const serverStat = this.graphStats[serverHost];
+
+        if (!this.graphBuffer[serverHost] || !serverStat[time] || serverStat[time] < online) {
             serverStat[time] = online;
-            updated = true;
-        }
-
-        if (!this.graphBuffer[serverHost] || forceEdit || updated) {
-            // Sort and clear 24h interval
-            const timeEntries = Object.entries(serverStat).map(([timestamp, value]) => [parseInt(timestamp), value]);
-            timeEntries.sort((a, b) => a[0] - b[0]);
-            const filteredTimeEntries = timeEntries.filter(([timestamp, value]) => time - timestamp <= 24 * 60 * 60 * 1000);
-            serverStat = Object.fromEntries(filteredTimeEntries);
 
             // Creating graph
             const onlines = [];
@@ -234,7 +233,7 @@ function roundToHour(date) {
 
 function createStatMsg(servers, statBot, imageUrl, color) {
     const { banner, serversText } = statBot;
-    const msgObj = { embeds: [] };
+    const msgObj = { embeds: [], files: [] };
 
     if (banner.startsWith('http')) msgObj.embeds.push(new EmbedBuilder().setImage(banner).setColor(color));
 
