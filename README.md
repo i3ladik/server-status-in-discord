@@ -34,10 +34,10 @@ Simple server monitoring in discord<br><br>
     "timeout_ms": 30000,
     "maxOnline": 0,
     "channelId": "981326671221248020", // optional
-    "startMsg": "starting...",
-    "statusMsg": "{online}/{max} on {map}",
-    "statusBotMsg": "online: {online} Max: {max}",
-    "unavailableMsg": "unavailable...",
+    "startMsg": "Starting...",
+    "statusMsg": "Players {online}/{max} on {map}",
+    "statusBotMsg": "Online: {online} Max online: {max}",
+    "unavailableMsg": "Unavailable...",
     "playersLabel": "Players 👥",
     "mapLabel": "Map 🗺️",
     "nicknameLabel": "Nickname 📛",
@@ -49,6 +49,7 @@ Simple server monitoring in discord<br><br>
         "token": "MIZrNTY2NTVzNTE3Nz...",
         "messageId": "messageId", // optional
         "serversText": "- **{name} - {host}**",
+        "additionalInfo": "\nLocation - your location (leave it clean if its not necessary)",
         "banner": "https://i.imgur.com/xN4r7PN.png"  // optional
     },
     "servers": [
@@ -142,4 +143,4 @@ Add all bots and restart
 
 # Result
 
-![Result](https://i.imgur.com/OPCFqaS.png)
+![Result](https://i.imgur.com/yvVw6pE.png)
