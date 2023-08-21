@@ -53,7 +53,7 @@ class StatusCoordinator {
         if (statBot.token.length > 10) {
             this.coordinatorBot = new Client({ intents: [] });
             await this.coordinatorBot.login(statBot.token);
-            this.coordinatorBot.user.setPresence({ activities: [{ type: ActivityType.Watching, name: startMsg }], status: 'idle' });
+            this.coordinatorBot.user.setPresence({ activities: [{ type: ActivityType.Custom, name: startMsg }], status: 'idle' });
 
             const link = this.coordinatorBot.generateInvite({ scopes: [OAuth2Scopes.Bot] });
             console.log(`Stats bot invite link: ${link}`);
@@ -125,7 +125,7 @@ class StatusCoordinator {
 
         this.coordinatorBot.user.setPresence({
             activities: [{
-                type: ActivityType.Watching,
+                type: ActivityType.Custom,
                 name: statusBotMsg.replaceAll('{online}', online).replaceAll('{max}', this.config.maxOnline)
             }], status: 'online'
         });
@@ -232,7 +232,7 @@ function roundToHour(date) {
 }
 
 function createStatMsg(servers, statBot, imageUrl, color) {
-    const { banner, serversText } = statBot;
+    const { banner, serversText, additionalInfo } = statBot;
     const msgObj = { embeds: [], files: [] };
 
     if (banner.startsWith('http')) msgObj.embeds.push(new EmbedBuilder().setImage(banner).setColor(color));
@@ -240,7 +240,7 @@ function createStatMsg(servers, statBot, imageUrl, color) {
     let text = '';
     for (const server of servers) text += `${serversText}\n`.replaceAll('{name}', server.name).replaceAll('{host}', server.host);
 
-    msgObj.embeds.push(new EmbedBuilder().setDescription(text).setImage(imageUrl).setColor(color));
+    msgObj.embeds.push(new EmbedBuilder().setDescription(text + additionalInfo).setImage(imageUrl).setColor(color));
 
     return msgObj;
 }
